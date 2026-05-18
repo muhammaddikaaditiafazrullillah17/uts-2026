@@ -1,23 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Livewire\Livewire;
-use Illuminate\Support\Facades\Response;
+use App\Models\Project;
 
-/* NOTE: Do Not Remove
-/ Livewire asset handling if using sub folder in domain
-*/
-
-Livewire::setUpdateRoute(function ($handle) {
-    return Route::post(config('app.asset_prefix') . '/livewire/update', $handle);
-});
-
-Livewire::setScriptRoute(function ($handle) {
-    return Route::get(config('app.asset_prefix') . '/livewire/livewire.js', $handle);
-});
-/*
-/ END
-*/
 Route::get('/', function () {
-    return view('welcome');
+
+    $projects = Project::latest()->get();
+
+    return view('welcome', compact('projects'));
+
+});
+
+Route::get('/test', function () {
+    return view('test');
+});
+
+Route::get('/admin', function () {
+    return redirect('/filament');
 });

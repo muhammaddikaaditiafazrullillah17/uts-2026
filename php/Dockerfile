@@ -1,9 +1,17 @@
 FROM php:8.3-fpm
 
-# Set Environment Variables
-ENV PS1="\u@\h:\w\\$ "
-ENV TZ="Asia/Jakarta"
-ENV COMPOSER_MEMORY_LIMIT='-1'
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    zip \
+    unzip \
+    libicu-dev \
+    libzip-dev \
+    && docker-php-ext-install intl zip pdo pdo_mysql
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -35,7 +43,7 @@ RUN echo "* * * * * root /usr/local/bin/php /var/www/html/artisan schedule:run >
 WORKDIR /var/www/html
 
 # Copy custom PHP configuration
-ADD ./local.ini /usr/local/etc/php/conf.d
+ADD ./php/local.ini /usr/local/etc/php/conf.d
 
 # Aliases for common Laravel commands
 RUN echo '#!/bin/bash\n/usr/local/bin/php /var/www/html/artisan "$@"' > /usr/bin/art && \
@@ -50,7 +58,7 @@ RUN echo '#!/bin/bash\n/usr/local/bin/php /var/www/html/artisan "$@"' > /usr/bin
     chmod +x /usr/bin/d
 
 # Copy entrypoint script
-COPY ./docker-entrypoint.sh /usr/local/bin/
+COPY ./php/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
     ln -s /usr/local/bin/docker-entrypoint.sh /
 
